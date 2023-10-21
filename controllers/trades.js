@@ -1,12 +1,12 @@
 const Trade = require("../models/trades");
 
 const createTrade = async (req, res) => {
-  // Get the required Data from the body
+  // Get the required data from the body
   const { id, type, user_id, symbol, shares, price } = req.body;
 
   try {
     // Create a new Trade
-    const craeteTrade = await Trade.create({
+    const newTrade = await Trade.create({
       id: id + 1,
       type,
       user_id,
@@ -16,11 +16,8 @@ const createTrade = async (req, res) => {
       timestamp: Date.now(),
     });
 
-    // Save the Trade
-    const trade = await craeteTrade.save();
-
-    res.status(201).json({ trade });
-  } catch (err) {
+    res.status(201).json({ trade: newTrade });
+  } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
@@ -29,23 +26,20 @@ const getAllTrades = async (req, res) => {
   try {
     const { type, user_id } = req.query;
 
-    // Find The trades
-    if (type || user_id) {
-      const trades = await Trade.findAll({
-        where: {
-          type,
-          user_id,
-        },
-      });
-      return res.status(200).json({ trades });
+    // Build the query options
+    const queryOptions = {};
+    if (type) {
+      queryOptions.type = type;
+    }
+    if (user_id) {
+      queryOptions.user_id = user_id;
     }
 
-    const trades = await Trade.findAll();
+    const trades = await Trade.findAll({
+      where: queryOptions,
+    });
 
-    // Return the trades
     res.status(200).json({ trades });
-
-    // Return error
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -54,15 +48,12 @@ const getAllTrades = async (req, res) => {
 const getTradeWithId = async (req, res) => {
   const { id } = req.params;
 
-  if (!id) return res.status(404).json({ message: "id not found" });
-  try {
-    const trade = await Trade.findAll({
-      where: {
-        id,
-      },
-    });
+  if (!id) return res.status(404).json({ message: "ID not found" });
 
-    if (!trade) return res.status(404).json({ message: "no trade found" });
+  try {
+    const trade = await Trade.findByPk(id);
+
+    if (!trade) return res.status(404).json({ message: "No trade found" });
 
     res.status(200).json({ trade });
   } catch (error) {
@@ -71,15 +62,15 @@ const getTradeWithId = async (req, res) => {
 };
 
 const updateTrade = async (req, res) => {
-  res.status(405).json({ message: "method not allowed" });
+  res.status(405).json({ message: "Method not allowed" });
 };
 
 const deleteTrade = async (req, res) => {
-  res.status(405).json({ message: "method not allowed" });
+  res.status(405).json({ message: "Method not allowed" });
 };
 
 const editTrade = async (req, res) => {
-  res.status(405).json({ message: "method not allowed" });
+  res.status(405).json({ message: "Method not allowed" });
 };
 
 module.exports = {
